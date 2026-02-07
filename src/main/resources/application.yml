@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: drools
+  ai:
+    openai:
+      base-url: https://api.suanli.cn
+      api-key: sk-auQH7r8mAUfjynzvZwo8GKFJcTXobdOngqps7ZBraTbswNgr
+      chat:
+        options:
+          model: Qwen/QwQ-32B
