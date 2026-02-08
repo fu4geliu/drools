@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns="http://www.drools.org/xsd/kmodule">
+    <!-- 默认 kbase 会扫描 rules 包下的所有规则 -->
+    <kbase name="demoKbase" packages="rules">
+        <ksession name="demoSession"/>
+    </kbase>
+</kmodule>

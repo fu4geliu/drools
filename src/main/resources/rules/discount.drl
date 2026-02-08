@@ -1,0 +1,32 @@
+package rules
+
+import com.example.drools.model.Order
+
+dialect "mvel"
+
+rule "VIP 大额订单"
+when
+    $o : Order(amount >= 500)  // ✅ 使用属性名，不是方法调用
+then
+    $o.setDiscount(20);
+    $o.setLevel("VIP");
+    System.out.println("[Drools] 触发: VIP 大额订单, amount=" + $o.getAmount());
+end
+
+rule "普通大额订单"
+when
+    $o : Order(amount >= 100, amount < 500)  // ✅ 复合约束，无需 eval
+then
+    $o.setDiscount(10);
+    $o.setLevel("STANDARD");
+    System.out.println("[Drools] 触发: 普通大额订单, amount=" + $o.getAmount());
+end
+
+rule "小额订单"
+when
+    $o : Order(amount < 100)
+then
+    $o.setDiscount(0);
+    $o.setLevel("NORMAL");
+    System.out.println("[Drools] 触发: 小额订单, amount=" + $o.getAmount());
+end

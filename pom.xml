@@ -76,6 +76,18 @@
             <version>${drools.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.drools</groupId>
+            <artifactId>drools-xml-support</artifactId>
+            <version>${drools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.drools</groupId>
+            <artifactId>drools-mvel</artifactId> <!-- ✅ 关键新增 -->
+            <version>${drools.version}</version>
+        </dependency>
+
         <!-- Jackson for JSON processing -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
