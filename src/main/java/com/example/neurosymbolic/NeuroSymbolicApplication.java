@@ -1,13 +1,13 @@
-package com.example.drools;
+package com.example.neurosymbolic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DroolsApplication {
+public class NeuroSymbolicApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DroolsApplication.class, args);
+        SpringApplication.run(NeuroSymbolicApplication.class, args);
     }
 
 }

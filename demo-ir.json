@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "title": "Demo RuleSet 1",
+    "domain": "Market Risk",
+    "source_document": "demo.pdf"
+  },
+  "rules": [
+    {
+      "rule_id": "R1",
+      "rule_name": "Simple demo rule",
+      "source": {
+        "section": "§1",
+        "text": "如果 position_direction 为 LONG，则初始化一个 demo 输出。"
+      },
+      "inputs": [
+        {
+          "name": "position_direction",
+          "type": "STRING", 
+          "description": "Position direction LONG/SHORT"
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "$ctx.getInputs().get(\"position_direction\") == \"LONG\"",
+          "description": "Only for LONG positions"
+        }
+      ],
+      "computation": {
+        "type": "STEPS",
+        "steps": [
+          {
+            "step_id": "s1",
+            "formula": "demo_output = 1"
+          }
+        ]
+      },
+      "outputs": [
+        {
+          "name": "demo_output",
+          "type": "DECIMAL",
+          "description": "Demo output field"
+        }
+      ],
+      "test_cases": [
+        {
+          "name": "LONG case",
+          "input": { 
+            "position_direction": "LONG"
+          },
+          "expected_output": { 
+            "demo_output": 1
+          }
+        }
+      ]
+    }
+  ],
+  "enums": {},
+  "functions": []
+}
