@@ -1,0 +1,83 @@
+AI + Drools 的金融合规可验证决策闭环研究
+项目名称	面向金融合规的“监管文本 -> 可执行规则(DMN/DRL) -> 可验证执行”闭环系统
+主场景	Basel III 标准法（信用风险/市场风险）规则计算与一致性验证；可扩展到 KYC/AML 风险评分
+研究路线	可验证的规则抽取与决策执行（neuro-symbolic + decision management）
+目标成果	1) 可复现实验与开源原型；2) 可部署的决策服务 Demo
+
+1 研究背景与问题定义
+金融机构在风控、适当性、反洗钱、资本计量等场景中长期依赖规则引擎（决策表/规则库）实现“可审计、可追溯、可解释”的合规决策。然而，监管规则以自然语言发布、频繁更新且包含大量例外条款，人工将文本转换为可执行规则（如 DMN/DRL）成本高、易出错，同时“规则是否正确”往往缺少形式化验证手段。
+近年来大模型在法规理解与推理方面表现突出，例如有研究评估 LLM 在 Basel III 监管文本下推导风险权重的能力，并显示合理的推理提示可以显著提升正确率。但仅依赖 LLM 直接输出决策结果仍存在可控性与一致性风险，难以满足金融合规对可验证与可审计的要求。
+因此，本课题聚焦“AI + Drools”的可验证决策闭环：用 LLM 辅助从监管文本中抽取结构化规则，再编译为 Drools 可执行的 DMN/DRL；引入 SMT 等形式化方法对规则库进行一致性/完备性/可达性验证，并通过反例驱动的修复机制持续演化规则。
+注：关于 LLM 处理 Basel III 监管文本的实证评估，参见文献 [5]；关于以 LLM+SMT 实现可验证合规推理的框架，参见 [2]。
+2 国内外研究现状与文献综述
+2.1 金融监管文本理解与推理
+监管科技(RegTech)方向的一条主线是将监管文本“程序化”。近期工作从不同角度验证了 LLM 在监管文本上的推理能力：一方面，基于 Basel III 标准法的大规模测试表明，采用 CoT/ToT 等推理策略可以提升风险权重推断准确度 [5]；另一方面，有研究提出系统化的提示工程与文档加载方法，将监管文本蒸馏为可计算的数学/代码表示 [9]。
+2.2 规则/决策建模与可解释决策管理（DMN/Drools）
+DMN 将业务决策作为一等公民，用决策需求图与决策表表达规则逻辑，具有良好的可读性与可执行性。相关研究总结了 DMN 的理论基础、工具与研究方向 [8]，并探索了“DMN + AI”用于改进决策模型理解与维护的可能性。例如，BISE 论文提出用 DMN 生成训练数据，再用 ML 的特征重要性回馈到 DMN 模型可视化上，从而提升可解释性与可维护性 [3]。工程界方面，Drools/Kogito 提供了 DMN 引擎与决策服务化部署能力 [6]。
+2.3 生成式 AI 辅助规则生成与低代码控制
+面向“文本 -> 规则”的自动化，近期出现两类代表性工作：(1) 面向 DMN 的自动化生成：ISD 2025 的税务场景案例展示了生成式 AI 辅助动态生成 DMN 规则以提高效率与可解释性 [4]；BPMJ 2026 工作进一步讨论了基于 agentic AI 从流程模型生成 DMN 决策表的可行性 [10]。(2) 面向 LLM 可控性的低代码/结构化提示：DMN-guided prompting 将 DMN 作为“提示的结构化骨架”，以提升 LLM 行为的可控性与稳定性 [1]。
+2.4 可验证/神经符号合规（LLM + SMT/约束求解）
+可验证合规的核心是把法规约束形式化，交给求解器进行一致性与最小修复推理。Neuro-Symbolic Compliance 框架将 LLM 的法规理解与 SMT 的可满足性验证结合，用于金融法律分析与最小事实修改建议 [2]。在更广义的治理/规则提取方向，P2T 工作将政策文本编译为可执行测试规则，并引入确定性校验与 SMT 冲突检查以提高可靠性 [7]。
+3 研究目标、研究问题与创新点
+本课题总体目标：构建一个“监管文本 -> 结构化规则 IR -> DMN/DRL -> 形式化验证 -> 运行时审计”的可验证决策闭环系统，并在 Basel III 标准法场景上给出可复现实验与原型系统，支撑 EI/SCI Q2 论文投稿。
+研究问题（Research Questions, RQ）：
+RQ1：在金融监管文本场景下，LLM 能否在结构化约束（schema/IR/DMN 骨架）下稳定地产生可执行规则，并显著优于纯提示或纯检索基线？
+RQ2：引入 SMT/约束求解的形式化验证与反例生成，能否有效发现规则冲突、覆盖缺口与边界错误，并通过“最小修复”提高规则库质量？
+RQ3：将决策执行下沉到 Drools（DMN/DRL）后，系统在可解释性、可审计性、运行时稳定性方面相对“直接让 LLM 决策”提升多少？
+预期创新点：
+提出面向金融合规的规则中间表示（IR），覆盖：来源条款、适用范围、条件/例外、计算公式、证据要求、输出口径等字段，并可编译到 DMN/DRL。
+提出“可验证生成”闭环：LLM 负责候选规则生成与解释，SMT/测试框架负责一致性/可达性/完备性验证，反例驱动规则修复与版本化治理。
+构建可复现评测基准：以 Basel III 风险权重/资本计量为主任务，提供规则级匹配 + 决策结果级准确率 + 审计可追溯性等多维指标。
+实现可部署原型：Kogito/Drools 决策服务 + 规则仓库 + 审计日志 + 人机复核工作台，形成可落地的 RegTech 工程范式。
+4 研究内容与技术路线
+整体技术路线如图 1 所示：从监管/制度文本出发，通过检索定位相关条款，LLM 在结构化 IR 约束下抽取候选规则，编译为 DMN/DRL 后进入验证与修复闭环，最终以决策服务形式对外提供可审计输出。
+
+图 1  技术路线总览
+说明：本课题强调“可执行（Drools）”与“可验证（SMT/测试）”，将 LLM 作为候选生成器与解释器，而不是最终裁决者。
+5 方法设计
+5.1 规则抽取：从监管文本到结构化 IR
+输入为监管文本（如 Basel III 标准法相关章节）与业务上下文（机构口径、产品类型、风险参数）。我们采用“检索定位 + 结构化抽取”的两阶段策略：
+1.条款定位：使用 RAG/稀疏-稠密混合检索定位与任务相关的条款片段，保留原文证据与版本信息。
+2.条款解析：对片段进行结构化标注（义务/禁止/例外/阈值/公式/表格条目），输出为候选“规则槽位”。
+3.IR 抽取：LLM 以 schema 约束输出 IR（JSON/YAML），字段包括：rule_id、source_span、applicability、conditions、exceptions、computations、outputs、evidence 等。
+4.可解释输出：LLM 同步给出“条款 -> 规则字段”的对齐解释，以便审计与人工复核。
+5.2 IR 编译：IR -> DMN/DRL（Drools）
+将 IR 作为“单一事实来源”，自动生成：(1) DMN 决策需求图与决策表（适合业务/合规人员审阅）；(2) Drools DRL 规则（适合工程执行与集成）。编译过程包含类型推断、枚举域对齐、缺失值策略、口径一致性（单位/币种/日期）以及可追溯映射（rule_id <-> DMN/DRL 节点）。
+5.3 形式化验证与反例驱动修复（SMT/测试）
+在规则进入生产前，引入验证层：对 DMN/DRL 进行一致性、完备性与边界覆盖检查；将关键决策条件与数值计算转译为 SMT 约束，利用求解器生成反例（counterexample）与最小修复建议。该思路与“LLM 解释 + SMT 验证”的 neuro-symbolic 合规框架一致 [2]，也与政策到可执行测试的 P2T 框架相呼应 [7]。
+一致性（Consistency）：是否存在互相矛盾的规则触发同一输出；SMT 检查不可满足或多解冲突。
+完备性（Completeness）：输入域是否覆盖；是否存在未被任何规则覆盖的输入区域（SMT 可求出缺口）。
+单调性/边界（Monotonicity & Boundary）：阈值附近是否出现不合理跳变；对连续变量进行边界采样与反例搜索。
+可达性（Reachability）：DMN 依赖图中是否存在永不触发的节点或无效分支。
+5.4 运行时审计、监控与人机协同
+运行时由 Kogito/Drools 提供决策服务化部署能力 [6]。系统对每次决策输出以下审计对象：输入快照、命中规则集合、证据片段（source_span）、计算链路与版本号。当验证层或线上监控发现异常（例如新增法规版本导致冲突、命中率突变、边界错误），触发人机复核流程：由 LLM 给出候选修订与解释，合规人员确认后进入规则仓库并重新验证。
+6 实验设计与评测指标
+以 Basel III 标准法为主任务，构建“监管文本 + 测试用例 -> 风险权重/资本计量输出”的评测基准。参考已有大规模测试的设置 [5]，并扩展到“规则级正确性”和“可审计性/可验证性”指标。
+决策结果级：风险权重/资本计量准确率（Accuracy）、边界用例通过率、鲁棒性（对措辞/上下文扰动的稳定性）。
+规则级：IR 字段匹配（slot F1）、DMN/DRL 编译通过率、规则覆盖率（输入域覆盖比例）。
+验证级：SMT 发现的冲突/缺口数量、修复后冲突下降幅度、反例复现率。
+工程级：延迟（P50/P95）、吞吐、规则更新成本（人时）、审计可追溯性（从输出回溯到条款的可达性）。
+7 数据来源与构建
+数据主要来自公开监管文件与合成/公开测试用例：(1) Basel III 相关标准法文本（BIS 发布）与公开附录；(2) 根据标准法条款构造覆盖边界的测试用例集（含多币种、多资产类别与阈值场景）；(3) 可选扩展：KYC/AML 风险评分与尽调清单的公开指南/政策文件，作为第二场景验证泛化能力。所有文本与规则工件做版本管理，确保可复现。
+8 系统实现与工程计划
+建议的工程栈：后端采用 Java/Spring Boot，规则执行采用 Drools DMN/DRL；决策服务化可选 Kogito（Quarkus 或 Spring Boot）；验证层采用 Z3 等 SMT 求解器；离线评测与数据构建使用 Python。大模型可通过 API 外接（如千问等），以“可插拔推理组件”接入。
+关于“外接现有 AI 模型是否与研究方向冲突”：不冲突。本课题的论文贡献聚焦在 IR 设计、编译链路、形式化验证与闭环治理机制；LLM 仅作为可替换的生成/解释模块。为确保学术可复现，需要在论文中明确：模型版本、提示/约束、温度与采样策略、以及通过验证层实现模型无关的可靠性提升。
+9 风险与对策、合规与伦理
+法规文本歧义与口径差异：引入“口径配置层”与人机复核；将争议条款标记为需要人工批准的规则。
+LLM 幻觉导致错误规则：强制 schema 输出 + 证据对齐；未通过验证/测试的规则禁止发布。
+SMT/形式化建模成本：优先覆盖可形式化的核心计算与阈值逻辑；对难形式化部分用属性测试与边界采样补足。
+数据与隐私：使用公开监管文本与合成用例；若引入真实业务数据需脱敏并完成伦理/合规审批。
+
+10 预期成果与论文投稿策略
+预期成果：（1）一个可部署的 RegTech 原型（规则抽取、编译、验证、决策服务、审计）；（2）一个可复现的 Basel III 规则评测基准；
+参考文献
+[1] Abedi, S.; Jalali, A. DMN-Guided Prompting: A Low-Code Framework for Controlling LLM Behavior. arXiv:2505.11701, 2025.
+[2] Hsia, Y.-S.; Yu, F.; Jiang, J.-H. R. Neuro-Symbolic Compliance: Integrating LLMs and SMT Solvers for Automated Financial Legal Analysis. arXiv:2601.06181, 2026.
+[3] Bork, D.; Ali, S. J.; Dinev, G. M. AI-Enhanced Hybrid Decision Management. Business & Information Systems Engineering, 65(2):179-199, 2023.
+[4] Makowski, M.; Trąbka, J. Dynamic generation of Decision Model and Notation rules for tax regulations – case study from Swiss accounting offices. ISD 2025 Proceedings. DOI:10.62036/ISD.2025.98, 2025.
+[5] Fazlija, B.; Ibraimi, M.; Forouzandeh, A.; Fazlija, A. Reasoning with financial regulatory texts via Large Language Models. Journal of Behavioral and Experimental Finance, 47:101067, 2025. DOI:10.1016/j.jbef.2025.101067.
+[6] Drools Documentation. Decision Model and Notation (DMN). https://docs.drools.org/latest/drools-docs/drools/DMN/index.html (accessed 2026-02-08).
+[7] Datla, G. V., et al. Executable Governance for AI: Translating Policies into Rules Using LLMs. AAAI 2026 Workshop AIGOV (OpenReview) / arXiv:2512.04408, 2025.
+[8] Figl, K. What we know and what we do not know about DMN. EMISA Journal, 2018.
+[9] Cao, Z.; Feinstein, Z. Large Language Model in Financial Regulatory Interpretation. arXiv:2405.06808, 2024.
+[10] Meddeb, S.; Batti, S.; Fathallah, H. BPMN DMN decision table generation based on agentic AI for critical applications. Business Process Management Journal (EarlyCite), 2026. DOI:10.1108/BPMJ-08-2025-1254.

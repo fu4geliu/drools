@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/rule-ir.schema.json",
+  "title": "Financial Regulatory Rule IR",
+  "description": "Intermediate representation (IR) for financial regulatory rules (e.g. Basel III) that can be compiled to DMN/DRL.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "rules", "enums"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Document-level metadata for auditability.",
+      "additionalProperties": false,
+      "required": ["title", "domain"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Human-readable title, e.g. 'Basel III Market Risk'."
+        },
+        "domain": {
+          "type": "string",
+          "description": "Regulatory / business domain, e.g. 'Market Risk'."
+        },
+        "source_document": {
+          "type": "string",
+          "description": "Primary source document identifier, e.g. 'd457.pdf'."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the IR document or rule set."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp for this IR instance."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp for this IR instance."
+        },
+        "tags": {
+          "type": "array",
+          "description": "Free-form tags for classification.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes for auditors / reviewers."
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "description": "Array of rule definitions extracted from regulatory text.",
+      "items": {
+        "$ref": "#/$defs/rule"
+      }
+    },
+    "enums": {
+      "type": "object",
+      "description": "Enum domains used by rules, typically derived from regulatory tables.",
+      "additionalProperties": {
+        "type": "object",
+        "description": "A named enum domain.",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "description": "Optional rich enum entry with description/value.",
+              "additionalProperties": false,
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": ["string", "number", "boolean", "null"]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "functions": {
+      "type": "array",
+      "description": "Library of reusable functions for complex computations.",
+      "items": {
+        "$ref": "#/$defs/function"
+      }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "description": "Single regulatory rule.",
+      "additionalProperties": false,
+      "required": ["rule_id", "rule_name", "source", "inputs", "computation", "outputs"],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "description": "Stable identifier, e.g. 'MAR22-001'."
+        },
+        "rule_name": {
+          "type": "string",
+          "description": "Human-readable rule name."
+        },
+        "category": {
+          "type": "string",
+          "description": "Optional category or risk type, e.g. 'DEFAULT_RISK'."
+        },
+        "source": {
+          "type": "object",
+          "description": "Link back to the originating regulatory text.",
+          "additionalProperties": false,
+          "required": ["section", "text"],
+          "properties": {
+            "section": {
+              "type": "string",
+              "description": "Section identifier in the source document, e.g. 'MAR22.9-22.11'."
+            },
+            "text": {
+              "type": "string",
+              "description": "Quoted text or summary from the regulation."
+            },
+            "document": {
+              "type": "string",
+              "description": "Optional document identifier if different from metadata.source_document."
+            },
+            "span": {
+              "type": "object",
+              "description": "Optional character / page span for precise traceability.",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "start_offset": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "end_offset": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "applicability": {
+          "type": "string",
+          "description": "Natural language description of when this rule applies."
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Structured conditions for rule triggering.",
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "Exception clauses where the rule does not apply.",
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "description": "Inputs required by this rule.",
+          "items": {
+            "$ref": "#/$defs/input"
+          }
+        },
+        "computation": {
+          "description": "Computation logic for this rule (formula, lookup, multi-step, etc.).",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/computationSteps"
+            },
+            {
+              "$ref": "#/$defs/computationLookup"
+            }
+          ]
+        },
+        "outputs": {
+          "type": "array",
+          "description": "Outputs produced by this rule.",
+          "items": {
+            "$ref": "#/$defs/output"
+          }
+        },
+        "test_cases": {
+          "type": "array",
+          "description": "Test cases for this rule, for regression and verification.",
+          "items": {
+            "$ref": "#/$defs/testCase"
+          }
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "description": "Input slot definition.",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Input name (identifier)."
+        },
+        "type": {
+          "type": "string",
+          "description": "Logical type of the input.",
+          "enum": ["DECIMAL", "INTEGER", "STRING", "BOOLEAN", "DATE", "ENUM"]
+        },
+        "enum_ref": {
+          "type": "string",
+          "description": "Name of enum domain if type = ENUM."
+        },
+        "range": {
+          "type": "array",
+          "description": "Inclusive numeric range [min, max] if applicable.",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "unit": {
+          "type": "string",
+          "description": "Measurement unit, e.g. 'CURRENCY', 'PERCENT'."
+        },
+        "nullable": {
+          "type": "boolean",
+          "description": "Whether this input may be null/missing.",
+          "default": false
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable explanation of this input."
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "description": "Output slot definition.",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["DECIMAL", "INTEGER", "STRING", "BOOLEAN", "DATE", "ENUM"]
+        },
+        "range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "unit": {
+          "type": "string"
+        },
+        "enum_ref": {
+          "type": "string",
+          "description": "Enum domain for categorical outputs."
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "description": "Condition or predicate used in applicability/exception clauses.",
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "type": "string",
+          "description": "Machine-readable expression language (e.g. FEEL, SpEL)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable explanation of the condition."
+        }
+      }
+    },
+    "computationSteps": {
+      "type": "object",
+      "description": "Multi-step computation (e.g. chained formulas).",
+      "additionalProperties": false,
+      "required": ["steps"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "STEPS",
+          "description": "Computation is represented as ordered steps."
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["step_id", "formula"],
+            "properties": {
+              "step_id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "formula": {
+                "type": "string",
+                "description": "Mathematical or FEEL-like formula."
+              }
+            }
+          }
+        }
+      }
+    },
+    "computationLookup": {
+      "type": "object",
+      "description": "Lookup-based computation (e.g. risk weight tables).",
+      "additionalProperties": false,
+      "required": ["type", "lookup_ref"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "LOOKUP",
+          "description": "Indicates a lookup-based computation."
+        },
+        "lookup_ref": {
+          "type": "string",
+          "description": "Identifier of the lookup function or table."
+        }
+      }
+    },
+    "testCase": {
+      "type": "object",
+      "description": "Single test case for a rule.",
+      "additionalProperties": false,
+      "required": ["name", "input", "expected_output"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object",
+          "description": "Concrete input values keyed by input name.",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        },
+        "expected_output": {
+          "type": "object",
+          "description": "Expected output values keyed by output name.",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        }
+      }
+    },
+    "function": {
+      "type": "object",
+      "description": "Reusable function definition for complex computations.",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Function identifier, used in computation blocks."
+        },
+        "description": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/input"
+          }
+        },
+        "output": {
+          "$ref": "#/$defs/output"
+        },
+        "implementation": {
+          "type": "string",
+          "description": "Optional implementation detail, e.g. Drools DRL snippet, FEEL expression, or reference to external service."
+        }
+      }
+    }
+  }
+}

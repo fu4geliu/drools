@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>drools</artifactId>
+    <artifactId>Neuro-Symbolic</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>drools</name>
-    <description>drools</description>
+    <name>Neuro-Symbolic</name>
+    <description>Neuro-Symbolic</description>
     <url/>
     <licenses>
         <license/>
@@ -30,6 +30,7 @@
         <java.version>17</java.version>
         <spring-ai.version>0.8.1</spring-ai.version>
         <drools.version>8.42.0.Final</drools.version>
+        <json-schema-validator.version>1.0.91</json-schema-validator.version>
     </properties>
 
     <dependencies>
@@ -114,6 +115,20 @@
             <version>${spring-ai.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- JSON Schema validation for IR documents -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+        <!-- Z3 SMT solver (self-contained native bindings via Maven) -->
+        <dependency>
+            <groupId>tools.aqua</groupId>
+            <artifactId>z3-turnkey</artifactId>
+            <version>4.14.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -126,6 +141,12 @@
     </build>
 
     <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
         <!-- Spring AI Repository -->
         <repository>
             <id>spring-milestones</id>

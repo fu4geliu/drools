@@ -1,10 +1,15 @@
+# DRL 落盘目录（存规则时编译并写入此处）
+neurosymbolic:
+  drl:
+    output-dir: target/generated-rules
+
 spring:
   application:
-    name: drools
+    name: Neuro-Symbolic
   ai:
     openai:
-      base-url: https://api.suanli.cn
-      api-key: sk-auQH7r8mAUfjynzvZwo8GKFJcTXobdOngqps7ZBraTbswNgr
+      base-url: ？
+      api-key: ？
       chat:
         options:
-          model: Qwen/QwQ-32B
+          model: ？

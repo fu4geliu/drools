@@ -1,10 +1,10 @@
-package com.example.drools;
+package com.example.neurosymbolic;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DroolsApplicationTests {
+class NeuroSymbolicApplicationTests {
 
     @Test
     void contextLoads() {

@@ -1,0 +1,112 @@
+{ "metadata": { "title": "Basel III Market Risk", "domain": "Market Risk", "source_document": "d457.pdf" },
+"rules": [ { "rule_id": "MAR22-001", "rule_name": "DRC: Gross JTD Calculation",
+  "source": {
+    "section": "MAR22.9-22.11",
+    "text": "Gross JTD = max(LGD × notional + P&L, 0) for long positions"
+  },
+  
+  "inputs": [
+    { "name": "lgd", "type": "DECIMAL", "range": [0, 1] },
+    { "name": "notional", "type": "DECIMAL" },
+    { "name": "pnl", "type": "DECIMAL" },
+    { "name": "position_direction", "type": "ENUM", "enum_ref": "PositionDirection" }
+  ],
+  
+  "computation": {
+    "steps": [
+      {
+        "step_id": "1",
+        "formula": "JTD_long = max(LGD × notional + P&L, 0)"
+      }
+    ]
+  },
+  
+  "outputs": [
+    { "name": "jtd", "type": "DECIMAL", "unit": "CURRENCY" }
+  ],
+  
+  "test_cases": [
+    {
+      "name": "Basic Long Position",
+      "input": { "lgd": 0.45, "notional": 1000000, "pnl": 0, "position_direction": "LONG" },
+      "expected_output": { "jtd": 450000 }
+    }
+  ]
+},
+
+{
+  "rule_id": "MAR22-002",
+  "rule_name": "DRC: Risk Weight Lookup",
+  
+  "source": {
+    "section": "MAR22.25",
+    "text": "Apply risk weight by credit quality category"
+  },
+  
+  "inputs": [
+    { "name": "credit_quality", "type": "ENUM", "enum_ref": "CreditQuality" }
+  ],
+  
+  "computation": {
+    "type": "LOOKUP",
+    "lookup_ref": "lookupRiskWeight"
+  },
+  
+  "outputs": [
+    { "name": "risk_weight", "type": "DECIMAL", "range": [0.005, 1.0] }
+  ],
+  
+  "test_cases": [
+    {
+      "name": "AAA Rating",
+      "input": { "credit_quality": "AAA" },
+      "expected_output": { "risk_weight": 0.005 }
+    },
+    {
+      "name": "Unrated Default",
+      "input": { "credit_quality": "UNRATED" },
+      "expected_output": { "risk_weight": 0.15 }
+    }
+  ]
+}
+],
+"enums": {
+    "InstrumentType": {
+      "BOND": "Fixed/Floating rate debt securities",
+      "DERIVATIVE": "Options, CDS, swaps, forwards",
+      "SECURITISATION": "MBS, ABS, CDO",
+      "EQUITY": "Stock positions",
+      "COMMODITY": "Commodity price exposures"
+    },
+    "PositionDirection": {
+      "LONG": "Exposure results in loss if default",
+      "SHORT": "Exposure results in gain if default"
+    },
+    "RiskCategory": {
+      "DEFAULT_RISK": "Jump-to-default (JTD) risk",
+      "CREDIT_SPREAD_RISK": "Changes in credit spreads",
+      "INTEREST_RATE_RISK": "Changes in interest rates",
+      "EQUITY_RISK": "Equity price movements",
+      "COMMODITY_RISK": "Commodity price movements"
+    },
+    "CreditQuality": {
+      "AAA": 0.5,
+      "AA": 2.0,
+      "A": 3.0,
+      "BBB": 6.0,
+      "BB": 15.0,
+      "B": 30.0,
+      "CCC": 50.0,
+      "UNRATED": 15.0,
+      "DEFAULTED": 100.0
+    }
+  }，
+"functions": [复杂函数 ] 
+}
+具体说明：
+{
+  "metadata": { /* 元数据 */ },（记录源信息，满足"可审计"要求）
+  "rules": [ /* 规则数组 */ ],
+  "enums": { /* 枚举定义 */ },（统一定义监管文本中的离散值表格）
+  "functions": [ /* 函数库 */ ]（函数库，用于复杂计算）
+}
